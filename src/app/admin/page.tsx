@@ -43,7 +43,9 @@ import {
   Globe,
   AlertTriangle,
   X,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Upload,
+  Link as LinkIcon
 } from 'lucide-react';
 
 interface ConfirmDialogState {
@@ -85,7 +87,7 @@ export default function AdminPage() {
   const [editingProduct, setEditingProduct] = useState<CatalogProduct | null>(null);
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
 
-  // In-App Confirmation Modal State (No native browser alerts/confirms!)
+  // In-App Confirmation Modal State
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
     isOpen: false,
     titleEn: '',
@@ -103,6 +105,23 @@ export default function AdminPage() {
     setProducts(getStoredProducts());
     setSubmissions(getStoredSubmissions());
   }, []);
+
+  // File Upload Helper (Reads local image as base64 Data URL)
+  const handleLocalImageSelect = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    onImageLoaded: (base64Url: string) => void
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          onImageLoaded(reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // --- Handlers ---
   const handleSaveBox = (e: React.FormEvent) => {
@@ -224,8 +243,8 @@ export default function AdminPage() {
       isOpen: true,
       titleEn: 'Reset All Store Data?',
       titleHy: 'Վերականգնե՞լ Բոլոր Տվյալները:',
-      messageEn: 'This will reset all subscription boxes, standalone books, accessories, and customer orders to initial demo state.',
-      messageHy: 'Սա կվերականգնի բոլոր տուփերը, գրքերը, ապրանքները և պատվերները սկզբնական դեմո վիճակի:',
+      messageEn: 'This will reset all subscription boxes, standalone books, accessories, and customer orders to initial state.',
+      messageHy: 'Սա կվերականգնի բոլոր տուփերը, գրքերը, ապրանքները և պատվերները սկզբնական վիճակի:',
       confirmLabelEn: 'Reset Everything',
       confirmLabelHy: 'Վերականգնել',
       onConfirm: () => {
@@ -303,7 +322,7 @@ export default function AdminPage() {
         </div>
       </header>
 
-      {/* Main Admin Body Layout (Sidebar + Main Content View) */}
+      {/* Main Admin Body Layout */}
       <div className="flex-1 flex flex-col md:flex-row">
         
         {/* Left Navigation Sidebar */}
@@ -480,44 +499,50 @@ export default function AdminPage() {
                 </div>
 
                 <div className="divide-y divide-pastel-border/60">
-                  {submissions.slice(0, 5).map((sub) => (
-                    <div key={sub.id} className="py-3 flex flex-wrap items-center justify-between gap-3 text-xs">
-                      <div>
-                        <span className="text-pastel-accent font-bold mr-1.5">#{sub.id}</span>
-                        <span className="font-bold text-pastel-text">{sub.customerName}</span>
-                        <span className="text-pastel-muted ml-2">({sub.email})</span>
-                        <span className="ml-2 font-semibold bg-pastel-pink px-2 py-0.5 rounded-md text-[10px]">
-                          {sub.country === 'Armenia' ? '🇦🇲 Armenia' : '🇺🇸 USA'}
-                        </span>
-                      </div>
+                  {submissions.length === 0 ? (
+                    <p className="py-6 text-center text-xs text-pastel-muted">
+                      {lang === 'en' ? 'No orders placed yet.' : 'Դեռևս պատվերներ չկան:'}
+                    </p>
+                  ) : (
+                    submissions.slice(0, 5).map((sub) => (
+                      <div key={sub.id} className="py-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+                        <div>
+                          <span className="text-pastel-accent font-bold mr-1.5">#{sub.id}</span>
+                          <span className="font-bold text-pastel-text">{sub.customerName}</span>
+                          <span className="text-pastel-muted ml-2">({sub.email})</span>
+                          <span className="ml-2 font-semibold bg-pastel-pink px-2 py-0.5 rounded-md text-[10px]">
+                            {sub.country === 'Armenia' ? '🇦🇲 Armenia' : '🇺🇸 USA'}
+                          </span>
+                        </div>
 
-                      <div className="flex items-center gap-3">
-                        <span className="text-[11px] text-amber-900 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md font-medium">
-                          {sub.ownedBooks.length} {lang === 'en' ? 'owned books listed' : 'ունեցած գրքեր'}
-                        </span>
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${
-                          sub.status === 'Shipped' || sub.status === 'Delivered'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : 'bg-amber-100 text-amber-800'
-                        }`}>
-                          {sub.status}
-                        </span>
-                        <button
-                          onClick={() => requestDeleteSubmission(sub.id, sub.customerName)}
-                          className="p-1 rounded-lg hover:bg-red-50 text-red-500 hover:text-red-700 transition-colors"
-                          title={lang === 'en' ? 'Delete Order' : 'Ջնջել Պատվերը'}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <span className="text-[11px] text-amber-900 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md font-medium">
+                            {sub.ownedBooks.length} {lang === 'en' ? 'owned books listed' : 'ունեցած գրքեր'}
+                          </span>
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-bold ${
+                            sub.status === 'Shipped' || sub.status === 'Delivered'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : 'bg-amber-100 text-amber-800'
+                          }`}>
+                            {sub.status}
+                          </span>
+                          <button
+                            onClick={() => requestDeleteSubmission(sub.id, sub.customerName)}
+                            className="p-1 rounded-lg hover:bg-red-50 text-red-500 hover:text-red-700 transition-colors"
+                            title={lang === 'en' ? 'Delete Order' : 'Ջնջել Պատվերը'}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
             </div>
           )}
 
-          {/* TAB 2: DEDICATED ORDERS & SUBSCRIBERS SECTION */}
+          {/* TAB 2: ORDERS SECTION */}
           {activeTab === 'submissions' && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
@@ -581,7 +606,6 @@ export default function AdminPage() {
                       key={sub.id}
                       className="bg-white border border-pastel-border rounded-2xl p-6 shadow-xs space-y-4 relative group"
                     >
-                      {/* Top Row */}
                       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-pastel-border/60 pb-3">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-bold text-pastel-accent">#{sub.id}</span>
@@ -589,7 +613,6 @@ export default function AdminPage() {
                           <span className="text-xs text-pastel-muted">({sub.email})</span>
                         </div>
 
-                        {/* Status Switcher Buttons + Delete Order Button */}
                         <div className="flex items-center gap-1.5">
                           {(['Pending', 'Curating', 'Shipped', 'Delivered'] as OrderStatus[]).map((st) => (
                             <button
@@ -605,7 +628,6 @@ export default function AdminPage() {
                             </button>
                           ))}
 
-                          {/* Delete Order Button */}
                           <button
                             onClick={() => requestDeleteSubmission(sub.id, sub.customerName)}
                             className="p-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition-colors ml-1"
@@ -616,7 +638,6 @@ export default function AdminPage() {
                         </div>
                       </div>
 
-                      {/* Details Grid */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-pastel-text">
                         <div className="space-y-2 bg-pastel-card p-4 rounded-xl border border-pastel-border/60">
                           <p><strong>{getTranslation(lang, 'labelCountry')}:</strong> {sub.country === 'Armenia' ? '🇦🇲 Armenia' : '🇺🇸 USA'}</p>
@@ -626,7 +647,6 @@ export default function AdminPage() {
                           <p><strong>{getTranslation(lang, 'genresList')}:</strong> {sub.genres.join(', ')}</p>
                         </div>
 
-                        {/* Owned Books Tracker Inspector */}
                         <div className="space-y-2 bg-amber-50/80 p-4 rounded-xl border border-amber-200">
                           <p className="font-bold text-amber-900 flex items-center gap-1.5">
                             <BookOpen className="w-4 h-4 text-amber-700" />
@@ -665,26 +685,28 @@ export default function AdminPage() {
                     {getTranslation(lang, 'tabBooks')}
                   </h2>
                   <p className="text-xs text-pastel-muted">
-                    {lang === 'en' ? 'Add individual book titles, cover image URLs, prices ($ & ֏), and delete books.' : 'Ավելացրեք նոր գրքեր, նկարների հղումներ, սահմանեք գները ($ և ֏):'}
+                    {lang === 'en' ? 'Add individual book titles, upload photos from computer, prices ($ & ֏).' : 'Ավելացրեք նոր գրքեր, ընտրեք նկարներ Ձեր համակարգչից:'}
                   </p>
                 </div>
+
+                {/* CLEAN NEW BOOK (No pre-filled text strings!) */}
                 <button
                   onClick={() => {
                     setEditingBook({
                       id: `book-${Date.now()}`,
-                      titleEn: 'New Book Title',
-                      titleHy: 'Նոր Գրքի Վերնագիր',
-                      authorEn: 'Author Name',
-                      authorHy: 'Հեղինակի Անուն',
-                      genreEn: 'Fiction',
-                      genreHy: 'Գեղարվեստական',
-                      priceUSD: 15.99,
-                      priceAMD: 6400,
-                      descriptionEn: 'Book synopsis...',
-                      descriptionHy: 'Գրքի նկարագրություն...',
+                      titleEn: '',
+                      titleHy: '',
+                      authorEn: '',
+                      authorHy: '',
+                      genreEn: '',
+                      genreHy: '',
+                      priceUSD: 0,
+                      priceAMD: 0,
+                      descriptionEn: '',
+                      descriptionHy: '',
                       inStock: true,
-                      badgeEn: 'New',
-                      badgeHy: 'Նոր',
+                      badgeEn: '',
+                      badgeHy: '',
                       image: '',
                     });
                     setIsCreatingBook(true);
@@ -699,16 +721,15 @@ export default function AdminPage() {
               {/* Books Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {books.map((b) => {
-                  const title = lang === 'en' ? b.titleEn : b.titleHy;
-                  const author = lang === 'en' ? b.authorEn : b.authorHy;
-                  const genre = lang === 'en' ? b.genreEn : b.genreHy;
+                  const title = (lang === 'en' ? b.titleEn : b.titleHy) || b.titleEn || b.titleHy || 'Untitled Book';
+                  const author = (lang === 'en' ? b.authorEn : b.authorHy) || b.authorEn || b.authorHy || 'Unknown Author';
+                  const genre = (lang === 'en' ? b.genreEn : b.genreHy) || b.genreEn || 'General';
 
                   return (
                     <div
                       key={b.id}
                       className="bg-white border border-pastel-border rounded-2xl p-4 shadow-xs flex gap-4"
                     >
-                      {/* Image Thumbnail */}
                       <div className="w-20 h-28 rounded-xl bg-pastel-card border border-pastel-border overflow-hidden shrink-0">
                         {b.image ? (
                           <img src={b.image} alt={title} className="w-full h-full object-cover" />
@@ -775,23 +796,25 @@ export default function AdminPage() {
                     {getTranslation(lang, 'tabProducts')}
                   </h2>
                   <p className="text-xs text-pastel-muted">
-                    {lang === 'en' ? 'Manage candles, bookmarks, sleeves, and teas with photos.' : 'Կառավարեք մոմերը, էջանիշերը և նկարները:'}
+                    {lang === 'en' ? 'Manage candles, bookmarks, sleeves, and tea with computer photo upload.' : 'Կառավարեք ապրանքները և ընտրեք նկարներ Ձեր համակարգչից:'}
                   </p>
                 </div>
+
+                {/* CLEAN NEW PRODUCT (No pre-filled text strings!) */}
                 <button
                   onClick={() => {
                     setEditingProduct({
                       id: `prod-${Date.now()}`,
-                      nameEn: 'Handmade Rose Soy Candle',
-                      nameHy: 'Ձեռագործ Վարդի Սոյայի Մոմ',
-                      categoryEn: 'Candles',
-                      categoryHy: 'Մոմեր',
-                      descriptionEn: 'Garden rose scent notes.',
-                      descriptionHy: 'Վարդի բույրով:',
-                      priceUSD: 13.99,
-                      priceAMD: 5600,
+                      nameEn: '',
+                      nameHy: '',
+                      categoryEn: '',
+                      categoryHy: '',
+                      descriptionEn: '',
+                      descriptionHy: '',
+                      priceUSD: 0,
+                      priceAMD: 0,
                       inStock: true,
-                      iconName: 'Flame',
+                      iconName: 'ShoppingBag',
                       image: '',
                     });
                     setIsCreatingProduct(true);
@@ -806,8 +829,8 @@ export default function AdminPage() {
               {/* Product Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {products.map((p) => {
-                  const name = lang === 'en' ? p.nameEn : p.nameHy;
-                  const category = lang === 'en' ? p.categoryEn : p.categoryHy;
+                  const name = (lang === 'en' ? p.nameEn : p.nameHy) || p.nameEn || p.nameHy || 'Item';
+                  const category = (lang === 'en' ? p.categoryEn : p.categoryHy) || p.categoryEn || 'General';
 
                   return (
                     <div
@@ -875,24 +898,26 @@ export default function AdminPage() {
                     {getTranslation(lang, 'tabBoxes')}
                   </h2>
                   <p className="text-xs text-pastel-muted">
-                    {lang === 'en' ? 'Edit subscription box sets, prices ($ & ֏), and box banner images.' : 'Խմբագրեք բաժանորդագրության տուփերը և նկարները:'}
+                    {lang === 'en' ? 'Edit subscription box sets, upload custom photos, set prices ($ & ֏).' : 'Խմբագրեք բաժանորդագրության տուփերը և նկարները:'}
                   </p>
                 </div>
+
+                {/* CLEAN NEW BOX (No pre-filled text strings!) */}
                 <button
                   onClick={() => {
                     setEditingBox({
                       id: `box-${Date.now()}`,
-                      nameEn: 'New Custom Box',
-                      nameHy: 'Նոր Տուփ',
-                      badgeEn: 'Special Edition',
-                      badgeHy: 'Հատուկ',
-                      priceUSD: 29.99,
-                      priceAMD: 12000,
-                      itemCount: 4,
-                      descriptionEn: 'Custom monthly box tier.',
-                      descriptionHy: 'Նոր տուփ:',
-                      itemsEn: ['1 Novel', '1 Soy Candle', '1 Bookmark'],
-                      itemsHy: ['1 Վեպ', '1 Սոյայի մոմ', '1 Էջանիշ'],
+                      nameEn: '',
+                      nameHy: '',
+                      badgeEn: '',
+                      badgeHy: '',
+                      priceUSD: 0,
+                      priceAMD: 0,
+                      itemCount: 1,
+                      descriptionEn: '',
+                      descriptionHy: '',
+                      itemsEn: [],
+                      itemsHy: [],
                       isPopular: false,
                       image: '',
                     });
@@ -907,7 +932,7 @@ export default function AdminPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {boxes.map((b) => {
-                  const boxName = lang === 'en' ? b.nameEn : b.nameHy;
+                  const boxName = (lang === 'en' ? b.nameEn : b.nameHy) || b.nameEn || b.nameHy || 'Box';
                   const boxDesc = lang === 'en' ? b.descriptionEn : b.descriptionHy;
                   const badge = lang === 'en' ? b.badgeEn : b.badgeHy;
 
@@ -924,9 +949,11 @@ export default function AdminPage() {
 
                       <div className="flex items-start justify-between">
                         <div>
-                          <span className="text-[10px] font-bold uppercase tracking-wider bg-pastel-pink text-pastel-text px-2 py-0.5 rounded-md border border-pastel-rose/30">
-                            {badge}
-                          </span>
+                          {badge && (
+                            <span className="text-[10px] font-bold uppercase tracking-wider bg-pastel-pink text-pastel-text px-2 py-0.5 rounded-md border border-pastel-rose/30">
+                              {badge}
+                            </span>
+                          )}
                           <h3 className="font-serif font-bold text-xl text-pastel-text mt-1">
                             {boxName}
                           </h3>
@@ -969,7 +996,7 @@ export default function AdminPage() {
         </main>
       </div>
 
-      {/* EDIT BOOK MODAL */}
+      {/* EDIT / CREATE BOOK MODAL */}
       {editingBook && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 w-full max-w-xl max-h-[85vh] overflow-y-auto space-y-4 shadow-2xl border border-pastel-border">
@@ -980,25 +1007,65 @@ export default function AdminPage() {
             </h3>
 
             <form onSubmit={handleSaveBook} className="space-y-4 text-xs">
-              {/* IMAGE URL INPUT & LIVE PREVIEW */}
-              <div className="bg-pastel-pink/30 p-3.5 rounded-2xl border border-pastel-rose/40 space-y-2">
-                <label className="block font-bold text-pastel-text flex items-center gap-1.5">
-                  <ImageIcon className="w-4 h-4 text-pastel-accent" />
-                  <span>{lang === 'en' ? 'Book Cover Image URL (Link)' : 'Գրքի Նկարի Հղում (URL)'}</span>
+              
+              {/* COMPUTER PHOTO UPLOAD & IMAGE URL LINK */}
+              <div className="bg-pastel-pink/30 p-4 rounded-2xl border border-pastel-rose/40 space-y-3">
+                <label className="block font-bold text-pastel-text flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <ImageIcon className="w-4 h-4 text-pastel-accent" />
+                    <span>{lang === 'en' ? 'Book Cover Photo' : 'Գրքի Նկար'}</span>
+                  </span>
+                  <span className="text-[11px] font-normal text-pastel-muted">Upload file or paste web link</span>
                 </label>
-                <input
-                  type="url"
-                  placeholder="https://images.unsplash.com/... or image link"
-                  value={editingBook.image || ''}
-                  onChange={(e) => setEditingBook({ ...editingBook, image: e.target.value })}
-                  className="w-full p-2.5 rounded-xl border border-pastel-border bg-white font-mono text-xs focus:outline-none focus:border-pastel-rose"
-                />
+
+                {/* Upload Button for Local Computer Files */}
+                <div className="flex flex-col sm:flex-row items-center gap-2">
+                  <label className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white border border-pastel-border hover:bg-pastel-pink cursor-pointer font-bold text-pastel-text flex items-center justify-center gap-2 shadow-xs transition-all">
+                    <Upload className="w-4 h-4 text-pastel-accent" />
+                    <span>{lang === 'en' ? '📁 Choose file from computer' : '📁 Ընտրել նկարը համակարգչից'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) =>
+                        handleLocalImageSelect(e, (base64) =>
+                          setEditingBook({ ...editingBook, image: base64 })
+                        )
+                      }
+                    />
+                  </label>
+
+                  <span className="text-xs text-pastel-muted font-bold hidden sm:inline">OR</span>
+
+                  {/* Web Image Link Input */}
+                  <div className="relative flex-1 w-full">
+                    <LinkIcon className="w-3.5 h-3.5 absolute left-3 top-3 text-pastel-muted" />
+                    <input
+                      type="url"
+                      placeholder={lang === 'en' ? 'Paste image URL link...' : 'Մուտքագրել նկարի հղումը...'}
+                      value={editingBook.image || ''}
+                      onChange={(e) => setEditingBook({ ...editingBook, image: e.target.value })}
+                      className="w-full pl-8 pr-3 py-2 rounded-xl border border-pastel-border bg-white font-mono text-xs focus:outline-none focus:border-pastel-rose"
+                    />
+                  </div>
+                </div>
+
+                {/* Live Preview Box */}
                 {editingBook.image && (
-                  <div className="flex items-center gap-3 pt-1">
-                    <div className="w-16 h-24 rounded-lg overflow-hidden border border-pastel-border shrink-0 shadow-xs">
-                      <img src={editingBook.image} alt="Preview" className="w-full h-full object-cover" />
+                  <div className="flex items-center justify-between bg-white p-2.5 rounded-xl border border-pastel-border shadow-xs">
+                    <div className="flex items-center gap-3">
+                      <div className="w-14 h-20 rounded-lg overflow-hidden border border-pastel-border shrink-0">
+                        <img src={editingBook.image} alt="Preview" className="w-full h-full object-cover" />
+                      </div>
+                      <span className="text-[11px] text-emerald-700 font-bold">✓ Photo loaded successfully</span>
                     </div>
-                    <span className="text-[11px] text-emerald-700 font-semibold">✓ Image preview loaded</span>
+                    <button
+                      type="button"
+                      onClick={() => setEditingBook({ ...editingBook, image: '' })}
+                      className="p-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold"
+                    >
+                      Remove
+                    </button>
                   </div>
                 )}
               </div>
@@ -1008,7 +1075,7 @@ export default function AdminPage() {
                   <label className="block font-bold mb-1">Title (English)</label>
                   <input
                     type="text"
-                    required
+                    placeholder="e.g. The Forty Days of Musa Dagh"
                     value={editingBook.titleEn}
                     onChange={(e) => setEditingBook({ ...editingBook, titleEn: e.target.value })}
                     className="w-full p-2.5 rounded-xl border border-pastel-border bg-pastel-card"
@@ -1018,7 +1085,7 @@ export default function AdminPage() {
                   <label className="block font-bold mb-1">Title (Armenian / Հայերեն)</label>
                   <input
                     type="text"
-                    required
+                    placeholder="օր. Մուսա Լեռան Քառասուն Օրը"
                     value={editingBook.titleHy}
                     onChange={(e) => setEditingBook({ ...editingBook, titleHy: e.target.value })}
                     className="w-full p-2.5 rounded-xl border border-pastel-border bg-pastel-card"
@@ -1031,7 +1098,7 @@ export default function AdminPage() {
                   <label className="block font-bold mb-1">Author (English)</label>
                   <input
                     type="text"
-                    required
+                    placeholder="e.g. Franz Werfel"
                     value={editingBook.authorEn}
                     onChange={(e) => setEditingBook({ ...editingBook, authorEn: e.target.value })}
                     className="w-full p-2.5 rounded-xl border border-pastel-border bg-pastel-card"
@@ -1041,7 +1108,7 @@ export default function AdminPage() {
                   <label className="block font-bold mb-1">Author (Armenian / Հայերեն)</label>
                   <input
                     type="text"
-                    required
+                    placeholder="օր. Ֆրանց Վերֆել"
                     value={editingBook.authorHy}
                     onChange={(e) => setEditingBook({ ...editingBook, authorHy: e.target.value })}
                     className="w-full p-2.5 rounded-xl border border-pastel-border bg-pastel-card"
@@ -1054,7 +1121,7 @@ export default function AdminPage() {
                   <label className="block font-bold mb-1">Genre (English)</label>
                   <input
                     type="text"
-                    required
+                    placeholder="e.g. Historical Fiction"
                     value={editingBook.genreEn}
                     onChange={(e) => setEditingBook({ ...editingBook, genreEn: e.target.value, genreHy: e.target.value })}
                     className="w-full p-2.5 rounded-xl border border-pastel-border bg-pastel-card"
@@ -1079,8 +1146,8 @@ export default function AdminPage() {
                   <input
                     type="number"
                     step="0.01"
-                    required
-                    value={editingBook.priceUSD}
+                    placeholder="0.00"
+                    value={editingBook.priceUSD || ''}
                     onChange={(e) => setEditingBook({ ...editingBook, priceUSD: parseFloat(e.target.value) || 0 })}
                     className="w-full p-2.5 rounded-xl border border-pastel-border bg-pastel-card"
                   />
@@ -1089,8 +1156,8 @@ export default function AdminPage() {
                   <label className="block font-bold mb-1">{getTranslation(lang, 'fieldPriceAMD')}</label>
                   <input
                     type="number"
-                    required
-                    value={editingBook.priceAMD}
+                    placeholder="0"
+                    value={editingBook.priceAMD || ''}
                     onChange={(e) => setEditingBook({ ...editingBook, priceAMD: parseInt(e.target.value) || 0 })}
                     className="w-full p-2.5 rounded-xl border border-pastel-border bg-pastel-card"
                   />
@@ -1101,6 +1168,7 @@ export default function AdminPage() {
                 <label className="block font-bold mb-1">Description / Synopsis</label>
                 <textarea
                   rows={3}
+                  placeholder="Short description..."
                   value={editingBook.descriptionEn}
                   onChange={(e) => setEditingBook({ ...editingBook, descriptionEn: e.target.value })}
                   className="w-full p-2.5 rounded-xl border border-pastel-border bg-pastel-card"
@@ -1127,7 +1195,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* EDIT PRODUCT MODAL */}
+      {/* EDIT / CREATE PRODUCT MODAL */}
       {editingProduct && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 w-full max-w-lg max-h-[85vh] overflow-y-auto space-y-4 shadow-2xl border border-pastel-border">
@@ -1136,25 +1204,62 @@ export default function AdminPage() {
             </h3>
 
             <form onSubmit={handleSaveProduct} className="space-y-4 text-xs">
-              {/* IMAGE URL INPUT & LIVE PREVIEW */}
-              <div className="bg-pastel-pink/30 p-3.5 rounded-2xl border border-pastel-rose/40 space-y-2">
-                <label className="block font-bold text-pastel-text flex items-center gap-1.5">
-                  <ImageIcon className="w-4 h-4 text-pastel-accent" />
-                  <span>{lang === 'en' ? 'Product Photo URL (Link)' : 'Ապրանքի Նկարի Հղում (URL)'}</span>
+              
+              {/* COMPUTER PHOTO UPLOAD & IMAGE URL LINK */}
+              <div className="bg-pastel-pink/30 p-4 rounded-2xl border border-pastel-rose/40 space-y-3">
+                <label className="block font-bold text-pastel-text flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <ImageIcon className="w-4 h-4 text-pastel-accent" />
+                    <span>{lang === 'en' ? 'Product Photo' : 'Ապրանքի Նկար'}</span>
+                  </span>
+                  <span className="text-[11px] font-normal text-pastel-muted">Upload file or paste web link</span>
                 </label>
-                <input
-                  type="url"
-                  placeholder="https://images.unsplash.com/... or image link"
-                  value={editingProduct.image || ''}
-                  onChange={(e) => setEditingProduct({ ...editingProduct, image: e.target.value })}
-                  className="w-full p-2.5 rounded-xl border border-pastel-border bg-white font-mono text-xs focus:outline-none focus:border-pastel-rose"
-                />
+
+                <div className="flex flex-col sm:flex-row items-center gap-2">
+                  <label className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white border border-pastel-border hover:bg-pastel-pink cursor-pointer font-bold text-pastel-text flex items-center justify-center gap-2 shadow-xs transition-all">
+                    <Upload className="w-4 h-4 text-pastel-accent" />
+                    <span>{lang === 'en' ? '📁 Choose file from computer' : '📁 Ընտրել նկարը համակարգչից'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) =>
+                        handleLocalImageSelect(e, (base64) =>
+                          setEditingProduct({ ...editingProduct, image: base64 })
+                        )
+                      }
+                    />
+                  </label>
+
+                  <span className="text-xs text-pastel-muted font-bold hidden sm:inline">OR</span>
+
+                  <div className="relative flex-1 w-full">
+                    <LinkIcon className="w-3.5 h-3.5 absolute left-3 top-3 text-pastel-muted" />
+                    <input
+                      type="url"
+                      placeholder={lang === 'en' ? 'Paste image URL link...' : 'Մուտքագրել նկարի հղումը...'}
+                      value={editingProduct.image || ''}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, image: e.target.value })}
+                      className="w-full pl-8 pr-3 py-2 rounded-xl border border-pastel-border bg-white font-mono text-xs focus:outline-none focus:border-pastel-rose"
+                    />
+                  </div>
+                </div>
+
                 {editingProduct.image && (
-                  <div className="flex items-center gap-3 pt-1">
-                    <div className="w-16 h-16 rounded-lg overflow-hidden border border-pastel-border shrink-0 shadow-xs">
-                      <img src={editingProduct.image} alt="Preview" className="w-full h-full object-cover" />
+                  <div className="flex items-center justify-between bg-white p-2.5 rounded-xl border border-pastel-border shadow-xs">
+                    <div className="flex items-center gap-3">
+                      <div className="w-14 h-14 rounded-lg overflow-hidden border border-pastel-border shrink-0">
+                        <img src={editingProduct.image} alt="Preview" className="w-full h-full object-cover" />
+                      </div>
+                      <span className="text-[11px] text-emerald-700 font-bold">✓ Photo loaded successfully</span>
                     </div>
-                    <span className="text-[11px] text-emerald-700 font-semibold">✓ Photo loaded</span>
+                    <button
+                      type="button"
+                      onClick={() => setEditingProduct({ ...editingProduct, image: '' })}
+                      className="p-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold"
+                    >
+                      Remove
+                    </button>
                   </div>
                 )}
               </div>
@@ -1164,7 +1269,7 @@ export default function AdminPage() {
                   <label className="block font-bold mb-1">{getTranslation(lang, 'fieldProductNameEn')}</label>
                   <input
                     type="text"
-                    required
+                    placeholder="e.g. Soy Candle"
                     value={editingProduct.nameEn}
                     onChange={(e) => setEditingProduct({ ...editingProduct, nameEn: e.target.value })}
                     className="w-full p-2.5 rounded-xl border border-pastel-border bg-pastel-card"
@@ -1174,7 +1279,7 @@ export default function AdminPage() {
                   <label className="block font-bold mb-1">{getTranslation(lang, 'fieldProductNameHy')}</label>
                   <input
                     type="text"
-                    required
+                    placeholder="օր. Սոյայի Մոմ"
                     value={editingProduct.nameHy}
                     onChange={(e) => setEditingProduct({ ...editingProduct, nameHy: e.target.value })}
                     className="w-full p-2.5 rounded-xl border border-pastel-border bg-pastel-card"
@@ -1188,8 +1293,8 @@ export default function AdminPage() {
                   <input
                     type="number"
                     step="0.01"
-                    required
-                    value={editingProduct.priceUSD}
+                    placeholder="0.00"
+                    value={editingProduct.priceUSD || ''}
                     onChange={(e) => setEditingProduct({ ...editingProduct, priceUSD: parseFloat(e.target.value) || 0 })}
                     className="w-full p-2.5 rounded-xl border border-pastel-border bg-pastel-card"
                   />
@@ -1198,8 +1303,8 @@ export default function AdminPage() {
                   <label className="block font-bold mb-1">{getTranslation(lang, 'fieldPriceAMD')}</label>
                   <input
                     type="number"
-                    required
-                    value={editingProduct.priceAMD}
+                    placeholder="0"
+                    value={editingProduct.priceAMD || ''}
                     onChange={(e) => setEditingProduct({ ...editingProduct, priceAMD: parseInt(e.target.value) || 0 })}
                     className="w-full p-2.5 rounded-xl border border-pastel-border bg-pastel-card"
                   />
@@ -1210,6 +1315,7 @@ export default function AdminPage() {
                 <label className="block font-bold mb-1">{getTranslation(lang, 'fieldDescEn')}</label>
                 <textarea
                   rows={2}
+                  placeholder="Short description..."
                   value={editingProduct.descriptionEn}
                   onChange={(e) => setEditingProduct({ ...editingProduct, descriptionEn: e.target.value })}
                   className="w-full p-2.5 rounded-xl border border-pastel-border bg-pastel-card"
@@ -1236,7 +1342,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* EDIT BOX MODAL */}
+      {/* EDIT / CREATE BOX MODAL */}
       {editingBox && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 w-full max-w-xl max-h-[85vh] overflow-y-auto space-y-4 shadow-2xl border border-pastel-border">
@@ -1245,25 +1351,62 @@ export default function AdminPage() {
             </h3>
 
             <form onSubmit={handleSaveBox} className="space-y-4 text-xs">
-              {/* IMAGE URL INPUT & LIVE PREVIEW */}
-              <div className="bg-pastel-pink/30 p-3.5 rounded-2xl border border-pastel-rose/40 space-y-2">
-                <label className="block font-bold text-pastel-text flex items-center gap-1.5">
-                  <ImageIcon className="w-4 h-4 text-pastel-accent" />
-                  <span>{lang === 'en' ? 'Box Banner Photo URL (Link)' : 'Տուփի Նկարի Հղում (URL)'}</span>
+              
+              {/* COMPUTER PHOTO UPLOAD & IMAGE URL LINK */}
+              <div className="bg-pastel-pink/30 p-4 rounded-2xl border border-pastel-rose/40 space-y-3">
+                <label className="block font-bold text-pastel-text flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <ImageIcon className="w-4 h-4 text-pastel-accent" />
+                    <span>{lang === 'en' ? 'Box Banner Photo' : 'Տուփի Նկար'}</span>
+                  </span>
+                  <span className="text-[11px] font-normal text-pastel-muted">Upload file or paste web link</span>
                 </label>
-                <input
-                  type="url"
-                  placeholder="https://images.unsplash.com/... or image link"
-                  value={editingBox.image || ''}
-                  onChange={(e) => setEditingBox({ ...editingBox, image: e.target.value })}
-                  className="w-full p-2.5 rounded-xl border border-pastel-border bg-white font-mono text-xs focus:outline-none focus:border-pastel-rose"
-                />
+
+                <div className="flex flex-col sm:flex-row items-center gap-2">
+                  <label className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white border border-pastel-border hover:bg-pastel-pink cursor-pointer font-bold text-pastel-text flex items-center justify-center gap-2 shadow-xs transition-all">
+                    <Upload className="w-4 h-4 text-pastel-accent" />
+                    <span>{lang === 'en' ? '📁 Choose file from computer' : '📁 Ընտրել նկարը համակարգչից'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) =>
+                        handleLocalImageSelect(e, (base64) =>
+                          setEditingBox({ ...editingBox, image: base64 })
+                        )
+                      }
+                    />
+                  </label>
+
+                  <span className="text-xs text-pastel-muted font-bold hidden sm:inline">OR</span>
+
+                  <div className="relative flex-1 w-full">
+                    <LinkIcon className="w-3.5 h-3.5 absolute left-3 top-3 text-pastel-muted" />
+                    <input
+                      type="url"
+                      placeholder={lang === 'en' ? 'Paste image URL link...' : 'Մուտքագրել նկարի հղումը...'}
+                      value={editingBox.image || ''}
+                      onChange={(e) => setEditingBox({ ...editingBox, image: e.target.value })}
+                      className="w-full pl-8 pr-3 py-2 rounded-xl border border-pastel-border bg-white font-mono text-xs focus:outline-none focus:border-pastel-rose"
+                    />
+                  </div>
+                </div>
+
                 {editingBox.image && (
-                  <div className="flex items-center gap-3 pt-1">
-                    <div className="w-24 h-16 rounded-lg overflow-hidden border border-pastel-border shrink-0 shadow-xs">
-                      <img src={editingBox.image} alt="Preview" className="w-full h-full object-cover" />
+                  <div className="flex items-center justify-between bg-white p-2.5 rounded-xl border border-pastel-border shadow-xs">
+                    <div className="flex items-center gap-3">
+                      <div className="w-20 h-14 rounded-lg overflow-hidden border border-pastel-border shrink-0">
+                        <img src={editingBox.image} alt="Preview" className="w-full h-full object-cover" />
+                      </div>
+                      <span className="text-[11px] text-emerald-700 font-bold">✓ Box banner loaded successfully</span>
                     </div>
-                    <span className="text-[11px] text-emerald-700 font-semibold">✓ Box image loaded</span>
+                    <button
+                      type="button"
+                      onClick={() => setEditingBox({ ...editingBox, image: '' })}
+                      className="p-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold"
+                    >
+                      Remove
+                    </button>
                   </div>
                 )}
               </div>
@@ -1273,7 +1416,7 @@ export default function AdminPage() {
                   <label className="block font-bold mb-1">{getTranslation(lang, 'fieldBoxNameEn')}</label>
                   <input
                     type="text"
-                    required
+                    placeholder="e.g. Standard Cozy Box"
                     value={editingBox.nameEn}
                     onChange={(e) => setEditingBox({ ...editingBox, nameEn: e.target.value })}
                     className="w-full p-2.5 rounded-xl border border-pastel-border bg-pastel-card"
@@ -1283,7 +1426,7 @@ export default function AdminPage() {
                   <label className="block font-bold mb-1">{getTranslation(lang, 'fieldBoxNameHy')}</label>
                   <input
                     type="text"
-                    required
+                    placeholder="օր. Ստանդարտ Տուփ"
                     value={editingBox.nameHy}
                     onChange={(e) => setEditingBox({ ...editingBox, nameHy: e.target.value })}
                     className="w-full p-2.5 rounded-xl border border-pastel-border bg-pastel-card"
@@ -1297,8 +1440,8 @@ export default function AdminPage() {
                   <input
                     type="number"
                     step="0.01"
-                    required
-                    value={editingBox.priceUSD}
+                    placeholder="0.00"
+                    value={editingBox.priceUSD || ''}
                     onChange={(e) => setEditingBox({ ...editingBox, priceUSD: parseFloat(e.target.value) || 0 })}
                     className="w-full p-2.5 rounded-xl border border-pastel-border bg-pastel-card"
                   />
@@ -1307,8 +1450,8 @@ export default function AdminPage() {
                   <label className="block font-bold mb-1">{getTranslation(lang, 'fieldPriceAMD')}</label>
                   <input
                     type="number"
-                    required
-                    value={editingBox.priceAMD}
+                    placeholder="0"
+                    value={editingBox.priceAMD || ''}
                     onChange={(e) => setEditingBox({ ...editingBox, priceAMD: parseInt(e.target.value) || 0 })}
                     className="w-full p-2.5 rounded-xl border border-pastel-border bg-pastel-card"
                   />
@@ -1319,6 +1462,7 @@ export default function AdminPage() {
                 <label className="block font-bold mb-1">{getTranslation(lang, 'fieldDescEn')}</label>
                 <textarea
                   rows={2}
+                  placeholder="Short description..."
                   value={editingBox.descriptionEn}
                   onChange={(e) => setEditingBox({ ...editingBox, descriptionEn: e.target.value })}
                   className="w-full p-2.5 rounded-xl border border-pastel-border bg-pastel-card"
@@ -1345,7 +1489,7 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* CUSTOM IN-APP CONFIRMATION MODAL (No browser alert/confirm!) */}
+      {/* CUSTOM IN-APP CONFIRMATION MODAL */}
       {confirmDialog.isOpen && (
         <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white rounded-3xl p-6 sm:p-8 w-full max-w-md shadow-2xl border border-pastel-border space-y-5 text-center relative">
