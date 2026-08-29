@@ -231,38 +231,7 @@ export const INITIAL_PRODUCTS: CatalogProduct[] = [
   }
 ];
 
-export const INITIAL_SUBMISSIONS: ReaderPreferenceSubmission[] = [
-  {
-    id: 'sub-101',
-    customerName: 'Anahit Sargsyan',
-    email: 'anahit.sargsyan@example.am',
-    country: 'Armenia',
-    address: '15 Tumanyan St, Yerevan 0001, Armenia',
-    selectedBoxId: 'box-deluxe',
-    genres: ['Fiction & Novels', 'Armenian History & Lit'],
-    readingVibe: 'Cozy & Soft',
-    bookLanguage: 'Both',
-    ownedBooks: ['The Forty Days of Musa Dagh', '1984 by George Orwell'],
-    notes: 'Please include Armenian poetry if possible! Love Earl Grey tea.',
-    createdAt: '2026-08-28T14:30:00Z',
-    status: 'Curating',
-  },
-  {
-    id: 'sub-102',
-    customerName: 'Michael Miller',
-    email: 'mmiller.reads@example.com',
-    country: 'USA',
-    address: '742 Evergreen Terrace, Glendale, CA 91205',
-    selectedBoxId: 'box-standard',
-    genres: ['Fantasy & Magic', 'Sci-Fi & Dystopian'],
-    readingVibe: 'Uplifting & Inspiring',
-    bookLanguage: 'English',
-    ownedBooks: ['The Hobbit by J.R.R. Tolkien', 'Dune by Frank Herbert'],
-    notes: 'Prefer soy candles over scented wax sprays.',
-    createdAt: '2026-08-27T10:15:00Z',
-    status: 'Shipped',
-  }
-];
+export const INITIAL_SUBMISSIONS: ReaderPreferenceSubmission[] = [];
 
 // LocalStorage Keys
 const BOXES_STORAGE_KEY = 'girqbox_boxes_v2';
@@ -312,11 +281,14 @@ export function saveStoredProducts(products: CatalogProduct[]) {
 
 // ---- Submissions ----
 export function getStoredSubmissions(): ReaderPreferenceSubmission[] {
-  if (typeof window === 'undefined') return INITIAL_SUBMISSIONS;
+  if (typeof window === 'undefined') return [];
   try {
     const data = localStorage.getItem(SUBMISSIONS_STORAGE_KEY);
-    return data ? JSON.parse(data) : INITIAL_SUBMISSIONS;
-  } catch { return INITIAL_SUBMISSIONS; }
+    if (!data) return [];
+    const parsed: ReaderPreferenceSubmission[] = JSON.parse(data);
+    // Filter out initial fake demo submissions (sub-101, sub-102)
+    return parsed.filter((s) => s.id !== 'sub-101' && s.id !== 'sub-102');
+  } catch { return []; }
 }
 export function saveStoredSubmissions(submissions: ReaderPreferenceSubmission[]) {
   if (typeof window !== 'undefined') localStorage.setItem(SUBMISSIONS_STORAGE_KEY, JSON.stringify(submissions));
