@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+@theme {
+  --color-pastel-bg: #FFFEFC;
+  --color-pastel-card: #FFFDFB;
+  --color-pastel-cardHover: #FFF7F3;
+  --color-pastel-pink: #FAF0F0;
+  --color-pastel-pinkHover: #F4E4E4;
+  --color-pastel-sage: #F0F5F2;
+  --color-pastel-sageHover: #E2ECE6;
+  --color-pastel-rose: #E8C2C5;
+  --color-pastel-accent: #D48C90;
+  --color-pastel-text: #3D322C;
+  --color-pastel-muted: #7A6C63;
+  --color-pastel-border: #F3EBE3;
+  --color-pastel-yellow: #FCF8EE;
+  --color-pastel-lavender: #F6F3F9;
+}
+
+:root {
+  --background: #FFFEFC;
+  --foreground: #3D322C;
+}
+
+body {
+  color: var(--foreground);
+  background-color: var(--background);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-image: radial-gradient(rgba(240, 220, 220, 0.4) 0.75px, transparent 0.75px), radial-gradient(rgba(220, 235, 225, 0.4) 0.75px, #FFFEFC 0.75px);
+  background-size: 36px 36px;
+  background-position: 0 0, 18px 18px;
+  overflow-x: hidden;
+}
+
+/* ===================== */
+/* Scroll Reveal Animations */
+/* ===================== */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1), transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-on-scroll.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Staggered children animation */
+.reveal-on-scroll .stagger-child {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.reveal-on-scroll.revealed .stagger-child:nth-child(1) { opacity: 1; transform: translateY(0); transition-delay: 0.05s; }
+.reveal-on-scroll.revealed .stagger-child:nth-child(2) { opacity: 1; transform: translateY(0); transition-delay: 0.15s; }
+.reveal-on-scroll.revealed .stagger-child:nth-child(3) { opacity: 1; transform: translateY(0); transition-delay: 0.25s; }
+.reveal-on-scroll.revealed .stagger-child:nth-child(4) { opacity: 1; transform: translateY(0); transition-delay: 0.35s; }
+.reveal-on-scroll.revealed .stagger-child:nth-child(5) { opacity: 1; transform: translateY(0); transition-delay: 0.45s; }
+.reveal-on-scroll.revealed .stagger-child:nth-child(6) { opacity: 1; transform: translateY(0); transition-delay: 0.55s; }
+
+/* ===================== */
+/* Fade-in animation (for popup) */
+/* ===================== */
+@keyframes fade-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ===================== */
+/* Custom Pastel Card */
+/* ===================== */
+.pastel-card {
+  background: rgba(255, 253, 251, 0.96);
+  backdrop-filter: blur(12px);
+  border: 1px solid #F3EBE3;
+  box-shadow: 0 8px 24px -8px rgba(122, 108, 99, 0.05);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.pastel-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 32px -8px rgba(212, 140, 144, 0.12);
+  border-color: #E8C2C5;
+}
+
+/* ===================== */
+/* Buttons */
+/* ===================== */
+.pastel-button-primary {
+  background-color: #D48C90;
+  color: #FFFFFF;
+  box-shadow: 0 4px 14px rgba(212, 140, 144, 0.28);
+  transition: all 0.2s ease;
+}
+
+.pastel-button-primary:hover {
+  background-color: #C4797D;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(212, 140, 144, 0.38);
+}
+
+.pastel-button-secondary {
+  background-color: #F0F5F2;
+  color: #31423B;
+  border: 1px solid #D8E4DE;
+  transition: all 0.2s ease;
+}
+
+.pastel-button-secondary:hover {
+  background-color: #E2ECE6;
+}
+
+.pastel-tag {
+  background-color: #FAF0F0;
+  color: #6E4447;
+  border: 1px solid #F2D8DA;
+}
+
+/* ===================== */
+/* Custom Scrollbar */
+/* ===================== */
+::-webkit-scrollbar { width: 7px; }
+::-webkit-scrollbar-track { background: #FFFEFC; }
+::-webkit-scrollbar-thumb { background: #E8C2C5; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #D48C90; }
