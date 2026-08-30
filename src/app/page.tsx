@@ -20,6 +20,7 @@ import { Footer } from '@/components/Footer';
 import { WelcomePopup } from '@/components/WelcomePopup';
 import { DeliveryMap } from '@/components/DeliveryMap';
 import { InstagramSection } from '@/components/InstagramSection';
+import { ItemDetailModal, DetailItem } from '@/components/ItemDetailModal';
 
 export default function HomePage() {
   const [mounted, setMounted] = useState(false);
@@ -31,6 +32,9 @@ export default function HomePage() {
   const [products, setProducts] = useState<CatalogProduct[]>(INITIAL_PRODUCTS);
   const [submissions, setSubmissions] = useState<ReaderPreferenceSubmission[]>(INITIAL_SUBMISSIONS);
   const [selectedBoxId, setSelectedBoxId] = useState<string>('box-deluxe');
+
+  // Dedicated Detail Preview Card Modal State
+  const [detailItem, setDetailItem] = useState<DetailItem | null>(null);
 
   // Hydrate from localStorage
   useEffect(() => {
@@ -95,8 +99,16 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen flex flex-col font-sans">
-      {/* Welcome popup (appears after 3s on first visit) */}
+      {/* Welcome popup */}
       <WelcomePopup lang={lang} />
+
+      {/* Item Detail View Card Modal */}
+      <ItemDetailModal
+        item={detailItem}
+        onClose={() => setDetailItem(null)}
+        lang={lang}
+        currency={currency}
+      />
 
       {/* Sticky Navbar */}
       <Navbar
@@ -122,6 +134,7 @@ export default function HomePage() {
             lang={lang} currency={currency}
             boxes={boxes}
             onSelectBox={(boxId) => { setSelectedBoxId(boxId); scrollTo('quiz-section'); }}
+            onViewDetail={(item) => setDetailItem(item)}
           />
         </div>
 
@@ -136,12 +149,17 @@ export default function HomePage() {
             lang={lang} currency={currency}
             books={books}
             onOrderBook={() => scrollTo('quiz-section')}
+            onViewDetail={(item) => setDetailItem(item)}
           />
         </div>
 
         {/* Accessories */}
         <div className="reveal-on-scroll">
-          <CatalogSection lang={lang} currency={currency} products={products} />
+          <CatalogSection
+            lang={lang} currency={currency}
+            products={products}
+            onViewDetail={(item) => setDetailItem(item)}
+          />
         </div>
 
         {/* Delivery Map */}

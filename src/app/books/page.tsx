@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Search, Heart, ShoppingCart, Filter, BookOpen } from 'lucide-react';
+import { ArrowLeft, Search, Heart, ShoppingCart, Filter, BookOpen, Eye } from 'lucide-react';
 import { BookItem, Language, Currency } from '@/lib/types';
 import { getStoredStandaloneBooks, INITIAL_BOOKS } from '@/lib/store';
 import { addToCart, Cart } from '@/components/Cart';
+import { ItemDetailModal, DetailItem } from '@/components/ItemDetailModal';
 
 interface GenreFilterItem {
   id: string;
@@ -31,6 +32,7 @@ export default function BooksPage() {
   const [genre, setGenre] = useState('All');
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [addedId, setAddedId] = useState<string | null>(null);
+  const [detailItem, setDetailItem] = useState<DetailItem | null>(null);
 
   useEffect(() => {
     setBooks(getStoredStandaloneBooks());
@@ -86,26 +88,34 @@ export default function BooksPage() {
 
   return (
     <div className="min-h-screen bg-[#FFFDFB] font-sans">
+      {/* Detail Modal */}
+      <ItemDetailModal
+        item={detailItem}
+        onClose={() => setDetailItem(null)}
+        lang={lang}
+        currency={currency}
+      />
+
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-pastel-border shadow-xs px-6 py-4 flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-pastel-border shadow-xs px-4 sm:px-6 py-3.5 sm:py-4 flex items-center justify-between gap-2 sm:gap-4">
         <Link
           href="/"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-pastel-card hover:bg-pastel-pink text-xs font-semibold text-pastel-text border border-pastel-border transition-all flex-shrink-0"
+          className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-pastel-card hover:bg-pastel-pink text-xs font-semibold text-pastel-text border border-pastel-border transition-all shrink-0"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>{lang === 'en' ? 'Back to Store' : 'Վերադառնալ Խանութ'}</span>
+          <span>{lang === 'en' ? 'Back' : 'Վերադառնալ'}</span>
         </Link>
 
-        <h1 className="font-serif text-lg sm:text-xl font-bold text-pastel-text flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-pastel-accent" />
-          <span>{lang === 'en' ? 'Standalone Book Catalog' : 'Գրքերի Կատալոգ'}</span>
+        <h1 className="font-serif text-base sm:text-xl font-bold text-pastel-text flex items-center gap-2 truncate">
+          <BookOpen className="w-5 h-5 text-pastel-accent shrink-0" />
+          <span className="truncate">{lang === 'en' ? 'Standalone Books' : 'Գրքերի Կատալոգ'}</span>
         </h1>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <div className="flex items-center bg-pastel-card rounded-lg p-0.5 border border-pastel-border shadow-xs">
             <button
               onClick={() => setCurrency('USD')}
-              className={`px-2 py-1 rounded-md text-[11px] font-bold ${
+              className={`px-1.5 sm:px-2 py-1 rounded-md text-[10px] sm:text-[11px] font-bold ${
                 currency === 'USD' ? 'bg-pastel-pink text-pastel-text shadow-xs' : 'text-pastel-muted'
               }`}
             >
@@ -113,7 +123,7 @@ export default function BooksPage() {
             </button>
             <button
               onClick={() => setCurrency('AMD')}
-              className={`px-2 py-1 rounded-md text-[11px] font-bold ${
+              className={`px-1.5 sm:px-2 py-1 rounded-md text-[10px] sm:text-[11px] font-bold ${
                 currency === 'AMD' ? 'bg-pastel-pink text-pastel-text shadow-xs' : 'text-pastel-muted'
               }`}
             >
@@ -123,18 +133,18 @@ export default function BooksPage() {
 
           <button
             onClick={() => setLang((l) => (l === 'en' ? 'hy' : 'en'))}
-            className="px-2.5 py-1.5 rounded-lg bg-pastel-card hover:bg-pastel-pink border border-pastel-border text-xs font-bold text-pastel-text shadow-xs"
+            className="px-2 py-1.5 rounded-lg bg-pastel-card hover:bg-pastel-pink border border-pastel-border text-xs font-bold text-pastel-text shadow-xs"
           >
-            {lang === 'en' ? '🇦🇲 Հայ' : '🇺🇸 Eng'}
+            {lang === 'en' ? '🇦🇲' : '🇺🇸'}
           </button>
 
           <Cart lang={lang} currency={currency} />
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8">
         {/* Search & Genre Filters */}
-        <div className="space-y-3 bg-white p-5 rounded-3xl border border-pastel-border shadow-xs">
+        <div className="space-y-3 bg-white p-4 sm:p-5 rounded-3xl border border-pastel-border shadow-xs">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-pastel-muted" />
             <input
@@ -146,7 +156,7 @@ export default function BooksPage() {
             />
           </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto pb-1">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
             <Filter className="w-4 h-4 text-pastel-muted flex-shrink-0" />
             {GENRE_FILTERS.map((g) => (
               <button
@@ -170,7 +180,7 @@ export default function BooksPage() {
         </p>
 
         {/* Books Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
           {filtered.map((book) => {
             const title = lang === 'en' ? book.titleEn : book.titleHy;
             const author = lang === 'en' ? book.authorEn : book.authorHy;
@@ -183,11 +193,14 @@ export default function BooksPage() {
             return (
               <div
                 key={book.id}
-                className="bg-white border border-pastel-border rounded-3xl p-5 shadow-xs hover:shadow-md transition-all duration-200 space-y-4 flex flex-col justify-between group"
+                className="bg-white border border-pastel-border rounded-3xl p-4 sm:p-5 shadow-xs hover:shadow-md transition-all duration-200 space-y-4 flex flex-col justify-between group"
               >
                 <div>
                   {/* REAL BOOK COVER / HIGH END PLACEHOLDER */}
-                  <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-4 bg-pastel-pink/20 border border-pastel-border/60 shadow-xs group-hover:shadow-md transition-all">
+                  <div
+                    onClick={() => setDetailItem({ type: 'book', data: book })}
+                    className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-4 bg-pastel-pink/20 border border-pastel-border/60 shadow-xs group-hover:shadow-md transition-all cursor-pointer"
+                  >
                     {book.image ? (
                       <img
                         src={book.image}
@@ -219,6 +232,14 @@ export default function BooksPage() {
                       </div>
                     )}
 
+                    {/* Quick View Hover Banner */}
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                      <span className="bg-white/90 backdrop-blur-md text-pastel-text text-[11px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-md">
+                        <Eye className="w-3.5 h-3.5 text-pastel-accent" />
+                        <span>{lang === 'en' ? 'Quick View' : 'Մանրամասներ'}</span>
+                      </span>
+                    </div>
+
                     {/* Top Overlay Badges */}
                     <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
                       {badge ? (
@@ -229,7 +250,10 @@ export default function BooksPage() {
                         <span />
                       )}
                       <button
-                        onClick={() => toggleWishlist(book)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleWishlist(book);
+                        }}
                         className={`pointer-events-auto w-8 h-8 rounded-full flex items-center justify-center border transition-all shadow-xs backdrop-blur-md ${
                           isWished
                             ? 'bg-rose-50 border-rose-200 text-rose-500'
@@ -247,7 +271,10 @@ export default function BooksPage() {
                     <span className="inline-block text-[10px] font-bold bg-pastel-sage/80 text-pastel-text px-2 py-0.5 rounded-md border border-pastel-sageHover">
                       {bookGenre}
                     </span>
-                    <h3 className="font-serif font-bold text-base text-pastel-text group-hover:text-pastel-accent transition-colors line-clamp-1 pt-1">
+                    <h3
+                      onClick={() => setDetailItem({ type: 'book', data: book })}
+                      className="font-serif font-bold text-base text-pastel-text group-hover:text-pastel-accent transition-colors line-clamp-1 pt-1 cursor-pointer"
+                    >
                       {title}
                     </h3>
                     <p className="text-xs text-pastel-muted italic">
@@ -258,14 +285,14 @@ export default function BooksPage() {
                 </div>
 
                 {/* Price + Cart */}
-                <div className="flex items-center justify-between pt-3 border-t border-pastel-border/60">
+                <div className="flex items-center justify-between pt-3 border-t border-pastel-border/60 gap-2">
                   <span className="font-serif font-bold text-lg text-pastel-accent">
                     {currency === 'USD' ? `$${book.priceUSD}` : `֏${book.priceAMD.toLocaleString()}`}
                   </span>
                   <button
                     onClick={() => handleAddCart(book)}
                     disabled={!book.inStock}
-                    className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-xs ${
+                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-xs shrink-0 ${
                       justAdded
                         ? 'bg-emerald-600 text-white'
                         : book.inStock
@@ -281,8 +308,8 @@ export default function BooksPage() {
                           : '✓ Ավելացված է!'
                         : book.inStock
                         ? lang === 'en'
-                          ? 'Add to Cart'
-                          : 'Ավելացնել Զամբյուղ'
+                          ? 'Add'
+                          : 'Ավելացնել'
                         : lang === 'en'
                         ? 'Out of Stock'
                         : 'Առկա չէ'}

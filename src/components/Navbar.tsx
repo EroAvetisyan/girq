@@ -46,23 +46,23 @@ export const Navbar: React.FC<NavbarProps> = ({
     >
       <div
         suppressHydrationWarning
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between gap-4"
+        className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 sm:h-18 flex items-center justify-between gap-2 sm:gap-4"
       >
         {/* Left: Brand Logo & Title */}
         <div
           suppressHydrationWarning
-          className="flex items-center space-x-3 cursor-pointer shrink-0 group select-none"
+          className="flex items-center space-x-2 sm:space-x-3 cursor-pointer shrink-0 group select-none"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-pastel-pink to-pastel-rose flex items-center justify-center shadow-xs border border-pastel-rose/30 group-hover:scale-105 transition-transform duration-200">
-            <BookOpen className="w-5 h-5 text-pastel-text" />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-pastel-pink to-pastel-rose flex items-center justify-center shadow-xs border border-pastel-rose/30 group-hover:scale-105 transition-transform duration-200">
+            <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-pastel-text" />
           </div>
           <div>
-            <div className="flex items-center space-x-1.5 leading-none">
-              <span className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-pastel-text">
+            <div className="flex items-center space-x-1 sm:space-x-1.5 leading-none">
+              <span className="font-serif text-lg sm:text-2xl font-bold tracking-tight text-pastel-text">
                 Girq<span className="text-pastel-accent">Box</span>
               </span>
-              <span className="text-[10px] font-semibold bg-pastel-pink text-pastel-text px-1.5 py-0.5 rounded-full border border-pastel-rose/30">
+              <span className="text-[9px] sm:text-[10px] font-semibold bg-pastel-pink text-pastel-text px-1.5 py-0.5 rounded-full border border-pastel-rose/30">
                 AM & US
               </span>
             </div>
@@ -114,7 +114,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </nav>
 
         {/* Right: Controls (Currency + Language + Cart) */}
-        <div suppressHydrationWarning className="flex items-center space-x-2.5 shrink-0">
+        <div suppressHydrationWarning className="flex items-center space-x-1.5 sm:space-x-2.5 shrink-0">
           {/* Currency Toggle */}
           <div
             suppressHydrationWarning
@@ -122,7 +122,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             <button
               onClick={() => setCurrency('USD')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+              className={`px-1.5 sm:px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition-all whitespace-nowrap ${
                 currency === 'USD'
                   ? 'bg-pastel-pink text-pastel-text shadow-xs'
                   : 'text-pastel-muted hover:text-pastel-text'
@@ -132,7 +132,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
             <button
               onClick={() => setCurrency('AMD')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+              className={`px-1.5 sm:px-2.5 py-1 rounded-lg text-[11px] sm:text-xs font-bold transition-all whitespace-nowrap ${
                 currency === 'AMD'
                   ? 'bg-pastel-pink text-pastel-text shadow-xs'
                   : 'text-pastel-muted hover:text-pastel-text'
@@ -145,11 +145,11 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Language Switcher */}
           <button
             onClick={() => setLang(lang === 'en' ? 'hy' : 'en')}
-            className="flex items-center space-x-1 bg-pastel-card hover:bg-pastel-pink px-2.5 py-1.5 rounded-xl text-xs font-bold text-pastel-text border border-pastel-border transition-all shadow-xs whitespace-nowrap"
+            className="flex items-center space-x-1 bg-pastel-card hover:bg-pastel-pink px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl text-xs font-bold text-pastel-text border border-pastel-border transition-all shadow-xs whitespace-nowrap"
             title="Toggle Language / Փոխել Լեզուն"
           >
             <Globe className="w-3.5 h-3.5 text-pastel-accent shrink-0" />
-            <span>{lang === 'en' ? '🇦🇲 Հայ' : '🇺🇸 Eng'}</span>
+            <span>{lang === 'en' ? '🇦🇲' : '🇺🇸'}</span>
           </button>
 
           {/* Cart Icon & Drawer */}
@@ -158,17 +158,17 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-xl bg-pastel-card text-pastel-text border border-pastel-border hover:bg-pastel-pink transition-colors"
+            className="md:hidden p-1.5 sm:p-2 rounded-xl bg-pastel-card text-pastel-text border border-pastel-border hover:bg-pastel-pink transition-colors"
             title="Menu"
           >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileMenuOpen ? <X className="w-4 h-4 sm:w-5 sm:h-5" /> : <Menu className="w-4 h-4 sm:w-5 sm:h-5" />}
           </button>
         </div>
       </div>
 
       {/* Mobile Drawer Dropdown Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-pastel-border px-6 py-5 space-y-3 text-sm font-semibold text-pastel-text animate-fade-in shadow-xl">
+        <div className="md:hidden bg-white border-b border-pastel-border px-5 py-4 space-y-2 text-sm font-semibold text-pastel-text animate-fade-in shadow-xl">
           <button
             onClick={() => {
               onScrollToBoxes();

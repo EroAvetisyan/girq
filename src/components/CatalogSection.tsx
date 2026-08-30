@@ -3,19 +3,22 @@
 import React, { useState } from 'react';
 import { Language, Currency, CatalogProduct } from '@/lib/types';
 import { getTranslation } from '@/lib/i18n';
-import { Flame, Bookmark, BookOpen, Coffee, ShoppingBag, Plus, Check } from 'lucide-react';
+import { Flame, Bookmark, BookOpen, Coffee, ShoppingBag, Plus, Check, Eye } from 'lucide-react';
 import { addToCart } from '@/components/Cart';
+import { DetailItem } from '@/components/ItemDetailModal';
 
 interface CatalogSectionProps {
   lang: Language;
   currency: Currency;
   products: CatalogProduct[];
+  onViewDetail?: (item: DetailItem) => void;
 }
 
 export const CatalogSection: React.FC<CatalogSectionProps> = ({
   lang,
   currency,
   products,
+  onViewDetail,
 }) => {
   const [addedId, setAddedId] = useState<string | null>(null);
 
@@ -50,26 +53,26 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
   };
 
   return (
-    <section className="py-16 lg:py-24 bg-[#FFFDF9]">
+    <section className="py-12 sm:py-16 lg:py-24 bg-[#FFFDF9]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
-          <div className="inline-flex items-center space-x-2 bg-pastel-pink/80 border border-pastel-rose/40 px-3.5 py-1.5 rounded-full text-xs font-semibold text-pastel-text">
+        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12 space-y-3">
+          <div className="inline-flex items-center space-x-2 bg-pastel-pink/80 border border-pastel-rose/40 px-3.5 py-1.5 rounded-full text-xs font-semibold text-pastel-text shadow-xs">
             <ShoppingBag className="w-4 h-4 text-pastel-accent" />
             <span>{getTranslation(lang, 'navCatalog')}</span>
           </div>
 
-          <h2 className="font-serif text-3xl sm:text-4xl font-bold text-pastel-text">
+          <h2 className="font-serif text-2xl sm:text-4xl font-bold text-pastel-text leading-tight">
             {lang === 'en' ? 'Cozy Standalone Goods & Add-Ons' : 'Առանձին Ապրանքներ և Աքսեսուարներ'}
           </h2>
 
-          <p className="text-sm sm:text-base text-pastel-muted font-light">
+          <p className="text-xs sm:text-base text-pastel-muted font-light px-2">
             {lang === 'en'
               ? 'Handcrafted items available individually or as add-ons to your monthly box.'
               : 'Ձեռագործ ապրանքներ, որոնք կարող եք ձեռք բերել առանձին կամ ավելացնել Ձեր տուփին:'}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
           {products.map((prod) => {
             const prodName = lang === 'en' ? prod.nameEn : prod.nameHy;
             const prodCategory = lang === 'en' ? prod.categoryEn : prod.categoryHy;
@@ -87,7 +90,10 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
               >
                 <div>
                   {/* Photo Container */}
-                  <div className="relative aspect-square rounded-xl overflow-hidden mb-4 bg-pastel-pink/20 border border-pastel-border/60 shadow-xs">
+                  <div
+                    onClick={() => onViewDetail && onViewDetail({ type: 'product', data: prod })}
+                    className="relative aspect-square rounded-xl overflow-hidden mb-4 bg-pastel-pink/20 border border-pastel-border/60 shadow-xs cursor-pointer"
+                  >
                     {prod.image ? (
                       <img
                         src={prod.image}
@@ -105,12 +111,22 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                       </div>
                     )}
 
+                    <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                      <span className="bg-white/90 backdrop-blur-md text-pastel-text text-[11px] font-bold px-3 py-1.5 rounded-full flex items-center gap-1 shadow-md">
+                        <Eye className="w-3.5 h-3.5 text-pastel-accent" />
+                        <span>{lang === 'en' ? 'Quick View' : 'Մանրամասներ'}</span>
+                      </span>
+                    </div>
+
                     <span className="absolute top-2.5 left-2.5 text-[10px] font-bold bg-white/90 backdrop-blur-md px-2.5 py-0.5 rounded-md text-pastel-text shadow-xs border border-white/50">
                       {prodCategory}
                     </span>
                   </div>
 
-                  <h3 className="font-serif font-bold text-base text-pastel-text group-hover:text-pastel-accent transition-colors mb-1 line-clamp-1">
+                  <h3
+                    onClick={() => onViewDetail && onViewDetail({ type: 'product', data: prod })}
+                    className="font-serif font-bold text-base text-pastel-text group-hover:text-pastel-accent transition-colors mb-1 line-clamp-1 cursor-pointer"
+                  >
                     {prodName}
                   </h3>
 
@@ -125,14 +141,14 @@ export const CatalogSection: React.FC<CatalogSectionProps> = ({
                   </span>
                   <button
                     onClick={() => handleAddProduct(prod)}
-                    className={`px-3.5 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1 transition-all shadow-xs ${
+                    className={`px-3.5 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1 transition-all shadow-xs shrink-0 ${
                       isJustAdded
                         ? 'bg-emerald-600 border-emerald-600 text-white'
                         : 'bg-pastel-sage hover:bg-pastel-sageHover border-pastel-sageHover text-pastel-text'
                     }`}
                   >
                     {isJustAdded ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
-                    <span>{isJustAdded ? (lang === 'en' ? 'Added!' : 'Ավելացված է!') : (lang === 'en' ? 'Add to Cart' : 'Ավելացնել')}</span>
+                    <span>{isJustAdded ? (lang === 'en' ? 'Added!' : 'Ավելացված է!') : (lang === 'en' ? 'Add' : 'Ավելացնել')}</span>
                   </button>
                 </div>
               </div>
