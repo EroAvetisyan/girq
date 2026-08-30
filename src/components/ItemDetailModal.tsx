@@ -3,10 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Language, Currency, SubscriptionBox, BookItem, CatalogProduct } from '@/lib/types';
-import { X, ShoppingCart, Heart, Check, BookOpen, Flame, Bookmark, Coffee, ShoppingBag, ShieldCheck, Sparkles, Plus, Minus } from 'lucide-react';
+import { X, ShoppingCart, Heart, Check, BookOpen, ShieldCheck, Sparkles, Plus, Minus } from 'lucide-react';
 import { addToCart } from '@/components/Cart';
 import { WishlistButton } from '@/components/WishlistButton';
-import Link from 'next/link';
 
 export type DetailItem =
   | { type: 'box'; data: SubscriptionBox }
@@ -35,7 +34,6 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
     setQuantity(1);
     setIsAdded(false);
 
-    // Prevent body scrolling when modal is open
     if (item) {
       document.body.style.overflow = 'hidden';
     } else {
@@ -145,49 +143,49 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
       {/* Backdrop Click to Close */}
       <div className="fixed inset-0" onClick={onClose} />
 
-      {/* Modal Card */}
-      <div className="relative bg-white rounded-3xl max-w-3xl w-full border border-pastel-border shadow-2xl overflow-hidden z-10 my-auto max-h-[92vh] flex flex-col md:flex-row">
+      {/* Modal Card - Full Mobile Scrollable Wrapper */}
+      <div className="relative bg-white rounded-3xl max-w-3xl w-full border border-pastel-border shadow-2xl overflow-y-auto z-10 my-auto max-h-[90vh] sm:max-h-[85vh] flex flex-col md:flex-row">
         
-        {/* Close Button */}
+        {/* Sticky Close Button (Always visible on mobile & desktop) */}
         <button
           onClick={onClose}
-          className="absolute top-3.5 right-3.5 z-20 p-2 rounded-full bg-white/90 backdrop-blur-md text-pastel-text hover:bg-pastel-pink border border-pastel-border/60 transition-all shadow-md"
+          className="absolute top-3.5 right-3.5 z-30 p-2 rounded-full bg-white/90 backdrop-blur-md text-pastel-text hover:bg-pastel-pink border border-pastel-border/60 transition-all shadow-md"
           aria-label="Close modal"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Left Side: Photo & Badges */}
-        <div className="w-full md:w-5/12 bg-pastel-pink/20 relative min-h-[260px] md:min-h-[420px] flex items-center justify-center border-b md:border-b-0 md:border-r border-pastel-border/60 overflow-hidden shrink-0">
+        <div className="w-full md:w-5/12 bg-pastel-pink/20 relative min-h-[240px] sm:min-h-[300px] md:min-h-[420px] flex items-center justify-center border-b md:border-b-0 md:border-r border-pastel-border/60 shrink-0">
           {imageUrl ? (
             <img
               src={imageUrl}
               alt={title}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover max-h-[320px] md:max-h-none"
             />
           ) : (
-            <div className="w-full h-full p-8 flex flex-col items-center justify-center text-center bg-gradient-to-br from-pastel-pink/40 to-pastel-yellow/30 text-pastel-text">
-              <BookOpen className="w-16 h-16 text-pastel-accent/60 mb-3" />
-              <h4 className="font-serif font-bold text-xl px-4 leading-tight">{title}</h4>
-              <p className="text-xs italic text-pastel-muted mt-2">{subtitle}</p>
+            <div className="w-full h-full p-8 flex flex-col items-center justify-center text-center bg-gradient-to-br from-pastel-pink/40 to-pastel-yellow/30 text-pastel-text min-h-[220px]">
+              <BookOpen className="w-14 h-14 text-pastel-accent/60 mb-2" />
+              <h4 className="font-serif font-bold text-lg px-4 leading-tight">{title}</h4>
+              <p className="text-xs italic text-pastel-muted mt-1.5">{subtitle}</p>
             </div>
           )}
 
           {/* Top Badges */}
-          <div className="absolute top-3.5 left-3.5 flex flex-col gap-1.5 items-start">
+          <div className="absolute top-3.5 left-3.5 flex flex-col gap-1.5 items-start pointer-events-none">
             {badge && (
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-white/95 backdrop-blur-md text-pastel-text px-2.5 py-1 rounded-md shadow-xs border border-white/60">
+              <span className="pointer-events-auto text-[10px] font-bold uppercase tracking-wider bg-white/95 backdrop-blur-md text-pastel-text px-2.5 py-1 rounded-md shadow-xs border border-white/60">
                 {badge}
               </span>
             )}
-            <span className="text-[10px] font-semibold bg-pastel-pink text-pastel-text px-2.5 py-1 rounded-md border border-pastel-rose/40 shadow-xs">
+            <span className="pointer-events-auto text-[10px] font-semibold bg-pastel-pink text-pastel-text px-2.5 py-1 rounded-md border border-pastel-rose/40 shadow-xs">
               {categoryTag}
             </span>
           </div>
 
-          {/* Wishlist Button in detail view */}
+          {/* Wishlist Button */}
           {item.type !== 'box' && (
-            <div className="absolute bottom-3.5 right-3.5 bg-white/90 backdrop-blur-md p-1.5 rounded-full shadow-md">
+            <div className="absolute bottom-3.5 right-3.5 bg-white/90 backdrop-blur-md p-1.5 rounded-full shadow-md z-20">
               <WishlistButton
                 itemId={item.data.id}
                 nameEn={item.type === 'book' ? item.data.titleEn : item.data.nameEn}
@@ -202,15 +200,15 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
         </div>
 
         {/* Right Side: Content Details & Actions */}
-        <div className="w-full md:w-7/12 p-5 sm:p-7 flex flex-col justify-between overflow-y-auto space-y-5">
+        <div className="w-full md:w-7/12 p-5 sm:p-7 flex flex-col justify-between space-y-5">
           <div className="space-y-4">
             
             {/* Header Title & Subtitle */}
-            <div className="space-y-1 pr-6">
+            <div className="space-y-1 pr-8">
               <span className="text-[11px] font-bold uppercase tracking-wider text-pastel-accent">
                 {categoryTag}
               </span>
-              <h3 className="font-serif text-2xl sm:text-3xl font-bold text-pastel-text leading-tight">
+              <h3 className="font-serif text-xl sm:text-3xl font-bold text-pastel-text leading-tight">
                 {title}
               </h3>
               <p className="text-xs sm:text-sm font-serif italic text-pastel-muted">
@@ -223,14 +221,14 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
               <span className="font-serif font-bold text-2xl sm:text-3xl text-pastel-accent">
                 {priceDisplay}
               </span>
-              <span className="text-xs text-pastel-muted">
+              <span className="text-[11px] sm:text-xs text-pastel-muted">
                 {lang === 'en' ? 'Taxes included • Express shipping available' : 'Հարկերը ներառված են • Արագ առաքում'}
               </span>
             </div>
 
             {/* Description */}
-            <div className="space-y-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-pastel-muted">
+            <div className="space-y-1.5">
+              <h4 className="text-[11px] font-bold uppercase tracking-wider text-pastel-muted">
                 {lang === 'en' ? 'About this item' : 'Ապրանքի մասին'}
               </h4>
               <p className="text-xs sm:text-sm text-pastel-muted leading-relaxed font-light">
@@ -240,12 +238,12 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
 
             {/* Included Items Checklist (For Subscription Boxes) */}
             {item.type === 'box' && (
-              <div className="space-y-2.5 bg-pastel-pink/20 p-4 rounded-2xl border border-pastel-rose/30">
+              <div className="space-y-2 bg-pastel-pink/20 p-3.5 sm:p-4 rounded-2xl border border-pastel-rose/30">
                 <h4 className="text-xs font-bold text-pastel-text flex items-center gap-1.5">
                   <Sparkles className="w-4 h-4 text-pastel-accent" />
                   <span>{lang === 'en' ? 'What is inside this box?' : 'Ի՞նչ կա այս տուփում'}</span>
                 </h4>
-                <ul className="space-y-2 text-xs text-pastel-text font-medium">
+                <ul className="space-y-1.5 text-xs text-pastel-text font-medium">
                   {(lang === 'en' ? itemsListEn : itemsListHy).map((it, idx) => (
                     <li key={idx} className="flex items-start gap-2">
                       <div className="w-4 h-4 rounded-full bg-pastel-accent text-white flex items-center justify-center text-[10px] shrink-0 mt-0.5">
@@ -259,7 +257,7 @@ export const ItemDetailModal: React.FC<ItemDetailModalProps> = ({
             )}
 
             {/* Trust Badges */}
-            <div className="grid grid-cols-2 gap-2.5 pt-2 text-[11px] font-medium text-pastel-muted">
+            <div className="grid grid-cols-2 gap-2 pt-1 text-[10px] sm:text-[11px] font-medium text-pastel-muted">
               <div className="flex items-center gap-2 bg-pastel-card p-2.5 rounded-xl border border-pastel-border/60">
                 <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span>{lang === 'en' ? '100% Curated Quality' : '100% Երաշխավորված Որակ'}</span>
